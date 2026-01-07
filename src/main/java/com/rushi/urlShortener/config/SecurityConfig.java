@@ -27,7 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/public/**","/auth/**").permitAll()
+                .antMatchers("/public/**","/auth/**","/url/generate").permitAll()
                 .antMatchers( "/user/**").authenticated()
                 .and()
                 .httpBasic();  // Add this if you want basic auth as fallback
