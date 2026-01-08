@@ -6,5 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ShortUrlResponse {
+    private String originalUrl;
     private String shortUrl;
 }
