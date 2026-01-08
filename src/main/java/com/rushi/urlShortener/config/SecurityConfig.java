@@ -35,10 +35,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/public/**",
                         "/auth/**",
                         "/url/shorten",
-                        "/{shortUrl}",
+                        "/r/{shortUrl}",
                         "/**"
                 ).permitAll()
-                .antMatchers("/url/shorten/auth").authenticated()
+                .antMatchers("/url/shorten/auth","/url/my","/url/shorten/custom").authenticated()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(
