@@ -36,7 +36,7 @@ public class AuthController {
             User user= new User();
             user.setEmail(request.getEmail());
             user.setPassword(request.getPassword());
-            userService.saveAuthUser(user);
+            userService.saveUser(user);
             return ResponseEntity.ok("User registered successfully");
         } catch (RuntimeException e) {
             return ResponseEntity
@@ -46,16 +46,20 @@ public class AuthController {
     }
 
 
-    @PostMapping("login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request){
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(
+            @RequestBody LoginRequest request
+    ) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
 
-        User user= new User();
-        user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail() , user.getPassword()));
-        UserDetails userDetails=userDetailService.loadUserByUsername(user.getEmail());
-        String jwt =  jwtUtil.generateToken(userDetails.getUsername());
+        String jwt = jwtUtil.generateToken(request.getEmail());
         return ResponseEntity.ok(new AuthResponse(jwt));
     }
+
 
 }

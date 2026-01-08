@@ -1,5 +1,6 @@
 package com.rushi.urlShortener.config;
 
+import com.rushi.urlShortener.security.JwtAuthFilter;
 import com.rushi.urlShortener.services.UserDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,12 +13,15 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 @Autowired
     private UserDetailServiceImpl userDetailService;
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -27,11 +31,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/public/**","/auth/**","/url/generate").permitAll()
-                .antMatchers( "/user/**").authenticated()
+                .antMatchers("/public/**", "/auth/**", "/url/shorten").permitAll()
+                .antMatchers("/url/shorten/auth").authenticated()
+                .anyRequest().authenticated()
                 .and()
-                .httpBasic();  // Add this if you want basic auth as fallback
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
     }
+
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
