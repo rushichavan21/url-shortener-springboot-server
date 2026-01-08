@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/url")
 public class UrlController {
@@ -53,7 +56,7 @@ public class UrlController {
     ) {
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
-                .getName(); // from JWT
+                .getName();
 
         User user = userService.findByEmail(email);
 
@@ -69,4 +72,57 @@ public class UrlController {
                 )
         );
     }
+
+    /**
+     * Get all URLs created by the authenticated user
+     */
+    @GetMapping("/my")
+    public ResponseEntity<List<ShortUrlResponse>> getMyUrls() {
+
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userService.findByEmail(email);
+
+        List<ShortUrl> urls = urlService.getUrlsByUser(user);
+
+        List<ShortUrlResponse> response = urls.stream()
+                .map(url -> new ShortUrlResponse(
+                        url.getOriginalUrl(),
+                        url.getShortUrl()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Create short URL with custom code (authenticated user only)
+     */
+    @PostMapping("/shorten/custom")
+    public ResponseEntity<ShortUrlResponse> shortenWithCustomCode(
+            @RequestBody ShortUrlRequest request
+    ) {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userService.findByEmail(email);
+
+        ShortUrl shortUrl = urlService.createCustomShortUrl(
+                request.getOriginalUrl(),
+                request.getCustomCode(),
+                user
+        );
+
+        return ResponseEntity.ok(
+                new ShortUrlResponse(
+                        shortUrl.getOriginalUrl(),
+                        shortUrl.getShortUrl()
+                )
+        );
+    }
+
+
 }

@@ -7,6 +7,8 @@ import com.rushi.urlShortener.repository.ShortUrlRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_ALPHABET;
 import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_NUMBER_GENERATOR;
 
@@ -43,5 +45,26 @@ public class UrlService {
             shortUrl = generateId(length);
         } while (shortUrlRepository.existsByShortUrl(shortUrl));
         return shortUrl;
+    }
+
+    public List<ShortUrl> getUrlsByUser(User user) {
+        return shortUrlRepository.findByUser(user);
+    }
+
+    public ShortUrl createCustomShortUrl(String originalUrl, String customCode, User user) {
+
+        if (customCode == null || customCode.trim().isEmpty()) {
+            throw new IllegalArgumentException("Custom code cannot be empty");
+        }
+        if (shortUrlRepository.existsByShortUrl(customCode)) {
+            throw new RuntimeException("Custom code already taken");
+        }
+
+        ShortUrl shortUrl = new ShortUrl();
+        shortUrl.setOriginalUrl(originalUrl);
+        shortUrl.setShortUrl(customCode);
+        shortUrl.setUser(user);
+
+        return shortUrlRepository.save(shortUrl);
     }
 }
