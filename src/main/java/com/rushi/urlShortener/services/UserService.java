@@ -4,27 +4,39 @@ import com.mongodb.DuplicateKeyException;
 import com.rushi.urlShortener.entity.User;
 import com.rushi.urlShortener.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public void saveUser(User user){
-        userRepository.save(user);
+    @Autowired
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
-    public void saveAuthUser(User user) {
+
+    /**
+     * Save authenticated user (signup)
+     */
+    public void saveUser(User user) {
         try {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
         } catch (DuplicateKeyException e) {
             throw new RuntimeException("Email already in use");
         }
+    }
+
+    /**
+     * Used by JWT flow
+     */
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
