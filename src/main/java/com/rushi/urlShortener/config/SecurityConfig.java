@@ -31,7 +31,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/public/**", "/auth/**", "/url/shorten").permitAll()
+                .antMatchers(
+                        "/public/**",
+                        "/auth/**",
+                        "/url/shorten",
+                        "/{shortUrl}",
+                        "/**"
+                ).permitAll()
                 .antMatchers("/url/shorten/auth").authenticated()
                 .anyRequest().authenticated()
                 .and()
@@ -40,6 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         UsernamePasswordAuthenticationFilter.class
                 );
     }
+
 
 
     @Override
